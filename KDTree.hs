@@ -24,6 +24,18 @@ goTop :: Zipper k -> Zipper k
 goTop (t, []) = (t, [])
 goTop z = goTop $ goUp z
 
+find :: (Ord k) => Node k -> KDTree k -> Zipper k
+find = ((reverse <$>) .) . find'
+  where
+    find' :: (Ord k) => Node k -> KDTree k -> Zipper k
+    find' n Empty = (Empty, [])
+    find' n t@(Fork l x@KDNode{node = xn, splitsAt = s} r)
+      | n == xn = (t, [])
+      | n ! s < xn ! s = (LeftChild x r :) <$> find n l
+      | otherwise = (RightChild x l :) <$> find n r
+
+--эта функция должна стать вспомогательной!!
+--(при вставке нового значения в дерево, мы не должны думать про splitsAt)
 insert :: (Ord k) => Int -> Int -> Node k -> KDTree k -> KDTree k
 insert d sp n Empty = Fork Empty (KDNode {node = n, splitsAt = sp `mod` d}) Empty
 insert d sp n t@(Fork l x@KDNode{node = xn, splitsAt = s} r)
