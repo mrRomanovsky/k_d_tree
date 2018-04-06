@@ -40,4 +40,4 @@ insertZipper d n t = case findZipper n t of
 
 
 fromNodesList :: (Ord k) => Int -> [Node k] -> KDTree k
-fromNodesList d = foldr (insert d 0) Empty
+fromNodesList d = foldl (flip $ insert d 0) Empty
