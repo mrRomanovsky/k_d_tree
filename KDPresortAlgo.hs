@@ -1,8 +1,7 @@
-import KDTree
-import KDAlgo
-import Data.List hiding (partition)
+--import KDTree
+--import KDAlgo
+import Data.List
 
---[k] is used instead of "Node k"
 getSorts :: Ord k => Int -> [[k]] -> [[[k]]]
 getSorts d src = sortRotate <$> [0..(d-1)]
   where
@@ -12,24 +11,17 @@ rotate :: Int -> [a] -> [a]
 rotate _ [] = []
 rotate n xs = zipWith const (drop n (cycle xs)) xs
 
---один шаг алгоритма:
---из заданного списка узлов выбрать медиану
---разделить все остальные списки узлов пополам - меньше или больше этой медианы соответственно
---(по тому же самому ключу!)
---во всех списках этот узел должен оказаться по середине(а ещё он должен стать узлом дерева?)
---дополнительно передаём количество измерений, чтобы не нужно было каждый раз искать length l
-step :: Ord k => [[[k]]] -> Int -> Int -> [[[k]]]
-step lsts dims lstNumber = let med = (lsts !! lstNumber) !! (dims `div` 2)
-                               in partition lstNumber med <$> lsts --не очень эффективно - список, из которого мы достаём медиану, можно и не обрабатывать 
+data Tree k = Empty | Fork (Tree k) [k] (Tree k)
 
-
---нужно сделать partition каждого списка кроме того, из которого выбирается медиана! 
---сравнение нужно проводить в нужном измерении!
-partition :: Ord k => Int -> [k] -> [[k]] -> [[k]]
-partition dim node lst = let (lower, upper) = foldr f ([], []) lst
-                             in lst --lower ++ (node : upper)
-  where
-    f x (l, g)
-      | rotate dim x < node = (x : l, g)
-      | rotate dim x > node = (l, x : g)
-      | otherwise = (l, g)
+buildTree :: Ord k => [[[k]]] -> Int -> Int -> Tree k
+buildTree l i tl = case l !! i of
+  []         -> Empty
+  (x:[])     -> Fork Empty x Empty
+  (x:y:[])   -> Fork (Fork Empty x Empty) y Empty
+  (x:y:z:[]) -> Fork (Fork Empty x Empty) y (Fork Empty z Empty)
+  ns         -> let m        = ns !! (length ns `div` 2)
+                    (pl, ph) = foldr part_acc ([], []) l
+                    part_acc xs (ls, hs) = let (lxs, (x:hxs)) = partition (<m) xs
+                                               in (lxs : ls, hxs : hs)
+                    next_idx = (i + 1) `mod` tl
+                    in Fork (buildTree pl next_idx tl) m (buildTree ph next_idx tl) 
