@@ -8,8 +8,5 @@ import Control.DeepSeq
 
 type Node k = (Array Int) k
 
-data KDNode k = KDNode {node :: Node k, splitsAt :: Int}
- deriving (Show, Eq, Generic, NFData)
-
-data KDTree k = Empty | Fork (KDTree k) (KDNode k) (KDTree k)
+data KDTree k = Empty | Fork (KDTree k) (Node k) (KDTree k)
  deriving (Show, Eq, Generic, NFData)

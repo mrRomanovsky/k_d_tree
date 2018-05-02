@@ -14,10 +14,10 @@ tree_2 = fromNodesList 3 $ listArray (0, 2) <$> nodes2
 
 tree_3 = fromNodesList 3 $ listArray (0, 2) <$> nodes3
 
-test_res = Fork (Fork Empty (KDNode {node = array (0,2) [(0,-1),(1,-2),(2,-3)], splitsAt = 1}) Empty)
-  (KDNode {node = array (0,2) [(0,1),(1,2),(2,3)], splitsAt = 0})
-  (Fork (Fork Empty (KDNode {node = array (0,2) [(0,4),(1,5),(2,6)], splitsAt = 2}) Empty)
-  (KDNode {node = array (0,2) [(0,7),(1,8),(2,9)], splitsAt = 1}) Empty)
+test_res = Fork (Fork Empty (array (0,2) [(0,-1),(1,-2),(2,-3)]) Empty)
+  (array (0,2) [(0,1),(1,2),(2,3)])
+  (Fork (Fork Empty (array (0,2) [(0,4),(1,5),(2,6)]) Empty)
+  (array (0,2) [(0,7),(1,8),(2,9)]) Empty)
 
 test1 = tree_1 == test_res
 
