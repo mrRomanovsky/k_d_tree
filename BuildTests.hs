@@ -19,8 +19,8 @@ test_res = Fork (Fork Empty (array (0,2) [(0,-1),(1,-2),(2,-3)]) Empty)
   (Fork (Fork Empty (array (0,2) [(0,4),(1,5),(2,6)]) Empty)
   (array (0,2) [(0,7),(1,8),(2,9)]) Empty)
 
-test1 = tree_1 == test_res
+test1 = checkTree tree_1 3 && tree_1 == test_res
 
-test2 = tree_2 == test_res
+test2 = checkTree tree_2 3 && tree_2 == test_res
 
-test3 = tree_3 == test_res
+test3 = checkTree tree_3 3 && tree_3 == test_res
