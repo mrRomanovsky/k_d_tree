@@ -1,5 +1,3 @@
---import KDTree
---import KDAlgo
 import Data.Array.IArray
 import Data.List
 import KDTree
