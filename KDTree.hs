@@ -2,11 +2,10 @@
 
 module KDTree where
 
-import GHC.Generics (Generic)
-import Data.Array.IArray
-import Control.DeepSeq
+import Data.Vector
 
-type Node k = (Array Int) k
+type Node k = Vector k
 
 data KDTree k = Empty | Fork (KDTree k) (Node k) (KDTree k)
- deriving (Show, Eq, Generic, NFData)
+  deriving (Show, Eq)
+-- deriving (Show, Eq, Generic, NFData)
