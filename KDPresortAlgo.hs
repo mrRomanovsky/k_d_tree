@@ -1,27 +1,41 @@
-import Data.Array.IArray
-import Data.List
+module KDPresortAlgo (balancedFromList) where
+import Data.Vector
 import KDTree
+import Data.List hiding (take, zipWith, drop, cycle, length, (++), foldr, partition, tail)
+import Prelude hiding (take, drop, (++), length, foldr, tail)
 
-getSorts :: Ord k => Int -> [[k]] -> [[[k]]]
-getSorts d src = sortRotate <$> [0..(d-1)]
+getSorts :: Ord k => Int -> [Node k] -> Vector (Vector (Node k))
+getSorts d src = sortRotate <$> generate d id
   where
-    sortRotate i = sortOn (rotate i) src
+    sortRotate i = fromList $ sort $ rotate i <$> src
 
-rotate :: Int -> [a] -> [a]
-rotate _ [] = []
-rotate n xs = zipWith const (drop n (cycle xs)) xs
+rotate :: Int -> Vector k -> Vector k
+rotate n v = (drop n v) ++ (take n v)
 
-lToArr tl x = (listArray (0, tl - 1) x)
+buildTree :: Ord k => Vector (Vector (Node k)) -> Int -> Int -> KDTree k
+buildTree l i c = let cur = l ! i
+                  in case length cur of
+  0 -> Empty
+  1 -> Fork Empty (cur ! 0) Empty
+  2 -> Fork (Fork Empty (cur ! 0) Empty)
+       (cur ! 1) Empty
+  3 -> Fork (Fork Empty (cur ! 0) Empty)
+       (cur ! 1) (Fork Empty (cur ! 2) Empty)
+  n -> let m = cur ! (n `div` 2)
+           d = length m
+           (pl, ph, _) = foldr parts (empty, empty, d - 1) l
+           parts xs (ls, hs, j) = let (lxs, hxs) =
+                                        partition pf xs
+                                      pf nd = let
+                                                rc = (d - j + i) `mod` d
+                                              in rotate rc nd < m 
+                                  in (cons lxs ls,
+                                     cons (tail hxs) hs, j - 1)
+           next_idx = (i + 1) `mod` c
+       in Fork (buildTree pl next_idx c) m (buildTree ph next_idx c)
 
-buildTree :: Ord k => [[[k]]] -> Int -> Int -> KDTree k
-buildTree l i tl = case l !! i of
-  []         -> Empty
-  (x:[])     -> Fork Empty (lToArr tl x) Empty
-  (x:y:[])   -> Fork (Fork Empty (lToArr tl x) Empty) (lToArr tl x) Empty
-  (x:y:z:[]) -> Fork (Fork Empty (lToArr tl x) Empty) (lToArr tl x) (Fork Empty (lToArr tl x) Empty)
-  ns         -> let m        = ns !! (length ns `div` 2)
-                    (pl, ph) = foldr part_acc ([], []) l
-                    part_acc xs (ls, hs) = let (lxs, (x:hxs)) = partition (<m) xs
-                                               in (lxs : ls, hxs : hs)
-                    next_idx = (i + 1) `mod` tl
-                    in Fork (buildTree pl next_idx tl) (lToArr tl m) (buildTree ph next_idx tl) 
+
+balancedFromList :: (Ord k) => Int -> [Node k] -> KDTree k
+balancedFromList d l = let sorts = getSorts d l
+                           c     = length sorts 
+                       in  buildTree sorts 0 c

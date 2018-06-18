@@ -1,4 +1,4 @@
-module KDZipper where
+module KDZipper (Zipper, goUp, goLeft, goRight, goTop, History(LeftChild, RightChild)) where
 import Prelude hiding (length)
 import Data.Vector
 import KDTree
